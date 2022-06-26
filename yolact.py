@@ -621,7 +621,13 @@ class Yolact(nn.Module):
 
                 module.weight.requires_grad = enable
                 module.bias.requires_grad = enable
-    
+    def gcn(self,out, i):
+        if i==1:
+            return self.gcn1(out)
+        if i==2:
+            return out
+        if i==3:
+            return out
     def forward(self, x):
         """ The input should be of size [batch_size, 3, img_h, img_w] """
         _, _, img_h, img_w = x.size()
@@ -640,8 +646,7 @@ class Yolact(nn.Module):
                 outs = torch.stack(outs, dim=0)'''
                 #outs[2] = self.gcn2(outs[2])
                 #outs[3] = self.gcn3(outs[3])
-                #outs = [self.gcn1(outs[i]) for i in cfg.backbone.selected_layers]
-                outs = [self.gcn1(outs[i]) for i in [1]]
+                outs = [gcn(outs[i],i) for i in cfg.backbone.selected_layers]
                 outs = self.fpn(outs)
 
 
