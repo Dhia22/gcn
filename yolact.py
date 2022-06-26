@@ -298,6 +298,22 @@ class GCN(MessagePassing):
 
     def message(self, x_j, norm):
         return norm.view(-1, 1) * x_j
+class GCNS(ScriptModuleWrapper):
+    def __init__(self, in_channels):
+        super().__init__()
+        self.gcns  = nn.ModuleList([
+            GCN(x,x)
+            for x in reversed(in_channels)
+        ])
+    @script_method_wrapper
+    def forward(self, convouts:List[torch.Tensor]):
+        out = []
+        x = torch.zeros(1, device=convouts[0].device)
+        for i in range(len(convouts)):
+            out.append(x)
+        for i, gcn in enumerate(self.gcns):
+            out[i] = gcn(convouts[i])
+        return out
 class FPN(ScriptModuleWrapper):
     """
     Implements a general version of the FPN introduced in
@@ -318,17 +334,6 @@ class FPN(ScriptModuleWrapper):
 
     def __init__(self, in_channels):
         super().__init__()
-        '''node_feats_dims = []
-        num_views = 3
-        node_feats_dims.append((256/num_views, 11, 11))#15488
-        node_feats_dims.append((256/num_views, 22, 22))#61952
-        node_feats_dims.append((256/num_views, 44, 44))#247808
-        self.gcn_layers = nn.ModuleList([GCNLayer(c_in=node_feats_dims[0], c_out=node_feats_dims[0]),
-                                         GCNLayer(c_in=node_feats_dims[1], c_out=node_feats_dims[1]),
-                                         GCNLayer(c_in=node_feats_dims[2], c_out=node_feats_dims[2])])
-        for i, layer in enumerate(self.gcn_layers):
-             layer.projection.weight.data = torch.ones([node_feats_dims[i]], dtype=torch.float64)
-             layer.projection.bias.data = torch.zeros([node_feats_dims[i]], dtype=torch.float64)'''
         self.lat_layers  = nn.ModuleList([
             nn.Conv2d(x, cfg.fpn.num_features, kernel_size=1)
             for x in reversed(in_channels)
@@ -490,9 +495,7 @@ class Yolact(nn.Module):
         if cfg.fpn is not None:
             # Some hacky rewiring to accomodate the FPN
             self.fpn = FPN([src_channels[i] for i in self.selected_layers])
-            self.gcn1 = GCN(44, 44)
-            #self.gcn2 = GCN(22, 22)
-            #self.gcn3 = GCN(11, 11)
+            self.gcns = GCNS([src_channels[i] for i in self.selected_layers])
             self.selected_layers = list(range(len(self.selected_layers) + cfg.fpn.num_downsample))
             src_channels = [cfg.fpn.num_features] * len(self.selected_layers)
 
@@ -628,15 +631,8 @@ class Yolact(nn.Module):
         if cfg.fpn is not None:
             with timer.env('fpn'):
                 # Use backbone.selected_layers because we overwrote self.selected_layers
-                '''outs[1] = self.gcn1(outs[1])
-                outs[2] = torch.tensor(outs[2])
-                outs[3] = torch.tensor(outs[3])
-                outs = torch.stack(outs, dim=0)'''
-                #outs[2] = self.gcn2(outs[2])
-                #outs[3] = self.gcn3(outs[3])
                 outs = [outs[i] for i in cfg.backbone.selected_layers]
-                print(len(outs))
-                #outs[0] = self.gcn1(outs[0])
+                outs = self.gcns(outs)
                 outs = self.fpn(outs)
 
 
