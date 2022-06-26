@@ -610,7 +610,7 @@ class Yolact(nn.Module):
         with timer.env('backbone'):
             outs = self.backbone(x)
         print("00")
-        print(outs.shape)
+        print(outs)
         if cfg.fpn is not None:
             with timer.env('fpn'):
                 # Use backbone.selected_layers because we overwrote self.selected_layers
