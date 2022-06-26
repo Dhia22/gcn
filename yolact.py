@@ -266,7 +266,9 @@ class GCN(nn.Module):
     def __init__(self):
         super().__init__()
         self.nbr_nodes = 16
-        self.adj_matrix = torch.tensor(np.ones((self.nbr_nodes, self.nbr_nodes))).cuda()
+        self.adj_matrix = np.ones((self.nbr_nodes, self.nbr_nodes))
+        self.adj_matrix = np.fill_diagonal(self.adj_matrix, 0)
+        self.adj_matrix = torch.tensor(self.adj_matrix).cuda()
         #self.projection = nn.Linear(c_in, c_out)
 
     def forward(self, node_feats):
