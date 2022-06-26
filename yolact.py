@@ -273,34 +273,31 @@ class GCN(MessagePassing):
             self.adj_matrix = np.ones((self.nbr_nodes, self.nbr_nodes))
             np.fill_diagonal(self.adj_matrix, 0)
             self.adj_matrix = torch.tensor(self.adj_matrix).cuda()
-        self.edge_index = self.adj_matrix.nonzero().t().contiguous()
-        self.edge_index, _ = add_self_loops(self.edge_index, num_nodes=self.nbr_nodes)
-        self.row, self.col = self.edge_index
         self.lin = Linear(in_channels, out_channels, bias=False)
         self.bias = Parameter(torch.Tensor(out_channels))
         self.reset_parameters()
-        #self.projection = nn.Linear(c_in, c_out)
     def reset_parameters(self):
         self.lin.reset_parameters()
         self.bias.data.zero_()
     def forward(self, node_feats):
-        x = torch.zeros(1, device=node_feats[0].device)
         x = torch.tensor_split(node_feats[0], self.nbr_nodes, dim=0)
+        edge_index = self.adj_matrix.nonzero().t().contiguous()
+        edge_index, _ = add_self_loops(edge_index, num_nodes=self.nbr_nodes)
         x = torch.stack(x)
         x = self.lin(x)
-        deg = degree(self.col, x.size(0), dtype=x.dtype)
+        row, col = edge_index
+        deg = degree(col, x.size(0), dtype=x.dtype)
         deg_inv_sqrt = deg.pow(-0.5)
         deg_inv_sqrt[deg_inv_sqrt == float('inf')] = 0
-        norm = torch.zeros(1, device=node_feats[0].device)
-        norm = deg_inv_sqrt[self.row] * deg_inv_sqrt[self.col]
-        out = self.propagate(self.edge_index, x=x, norm=norm)
+        norm = deg_inv_sqrt[row] * deg_inv_sqrt[col]
+        out = self.propagate(edge_index, x=x, norm=norm)
         out += self.bias
         out = out.reshape(out.shape[0]*out.shape[1],out.shape[2],out.shape[3])
         return out
 
     def message(self, x_j, norm):
         return norm.view(-1, 1) * x_j
-class GCNS(ScriptModuleWrapper):
+class GCNS():
     def __init__(self, in_channels):
         super().__init__()
         self.gcns  = nn.ModuleList([
