@@ -268,7 +268,8 @@ class GCN(nn.Module):
         #self.projection = nn.Linear(c_in, c_out)
 
     def forward(self, node_feats):
-        print(torch.tensor_split(node_feats, 16, dim=0)[0].shape)
+        print("01")
+        print(torch.tensor_split(node_feats[0], 16, dim=0)[0].shape)
         """
         Inputs:
             node_feats - Tensor with node features of shape [batch_size, num_nodes, c_in]
@@ -357,8 +358,6 @@ class FPN(ScriptModuleWrapper):
 
         for i, lat_layer in enumerate(self.lat_layers):
             j -= 1
-            print("01")
-            print(convouts[j].shape)
             # convouts[j] -> node_feats
             '''node_feats = torch.arange(8, dtype=torch.float32).view(1, 3, 2)
             print(node_feats)
