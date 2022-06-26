@@ -30,8 +30,7 @@ use_jit = torch.cuda.device_count() <= 1
 if not use_jit:
     print('Multiple GPUs detected! Turning off JIT.')
 
-ScriptModuleWrapper = torch.jit.ScriptModule if use_jit else nn.Module
-script_method_wrapper = torch.jit.script_method if use_jit else lambda fn, _rcn=None: fn
+
 
 
 
@@ -300,7 +299,7 @@ class GCN(MessagePassing):
 class GCNS(nn.Module):
     def __init__(self, in_channels):
         super().__init__()
-        self.gcns  = nn.ModuleList([
+        self.gcns = nn.ModuleList([
             GCN(x,x)
             for x in reversed(in_channels)
         ])
@@ -313,7 +312,7 @@ class GCNS(nn.Module):
         for i, gcn in enumerate(self.gcns):
             out[i] = gcn(convouts[i])
         return out
-class FPN(ScriptModuleWrapper):
+class FPN(nn.Module):
     """
     Implements a general version of the FPN introduced in
     https://arxiv.org/pdf/1612.03144.pdf
@@ -418,7 +417,7 @@ class FPN(ScriptModuleWrapper):
 
         return out
 
-class FastMaskIoUNet(ScriptModuleWrapper):
+class FastMaskIoUNet(nn.Module):
 
     def __init__(self):
         super().__init__()
