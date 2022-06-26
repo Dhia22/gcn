@@ -269,10 +269,10 @@ class GCN(nn.Module):
 
     def forward(self, node_feats):
         print("01")
-        self.nbr_nodes = node_feats[0].shape[0]/self.dim_node
-        print(self.nbr_nodes)
-        print(len(torch.tensor_split(node_feats[0], self.nbr_node, dim=0)))
-        print(torch.tensor_split(node_feats[0], self.nbr_nodes, dim=0)[0].shape)
+        nbr_nodes = node_feats[0].shape[0]/self.dim_node
+        print(nbr_nodes)
+        print(len(torch.tensor_split(node_feats[0], nbr_node, dim=0)))
+        print(torch.tensor_split(node_feats[0], nbr_nodes, dim=0)[0].shape)
         """
         Inputs:
             node_feats - Tensor with node features of shape [batch_size, num_nodes, c_in]
@@ -281,12 +281,12 @@ class GCN(nn.Module):
                          Shape: [batch_size, num_nodes, num_nodes]
         """
         # Num neighbours = number of incoming edges
-        self.adj_matrix = np.ones((self.nbr_nodes, self.nbr_nodes))
-        np.fill_diagonal(self.adj_matrix, 0)
-        self.adj_matrix = torch.tensor(self.adj_matrix).cuda()
+        adj_matrix = np.ones((nbr_nodes, nbr_nodes))
+        np.fill_diagonal(adj_matrix, 0)
+        adj_matrix = torch.tensor(adj_matrix).cuda()
 
-        num_neighbours = self.adj_matrix.sum(dim=-1)
-        node_feats[0] = torch.mm(self.adj_matrix, node_feats[0])
+        num_neighbours = adj_matrix.sum(dim=-1)
+        node_feats[0] = torch.mm(adj_matrix, node_feats[0])
         node_feats[0] = node_feats[0] / num_neighbours
         '''node_feats = self.projection(node_feats)
         node_feats = torch.bmm(adj_matrix, node_feats)
