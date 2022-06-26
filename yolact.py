@@ -286,6 +286,7 @@ class GCN(MessagePassing):
         edge_index, _ = add_self_loops(edge_index, num_nodes=self.nbr_nodes)
         x = torch.stack(x)
         x = self.lin(x)
+        print(edge_index)
         row, col = edge_index
         deg = degree(col, x.size(0), dtype=x.dtype)
         deg_inv_sqrt = deg.pow(-0.5)
