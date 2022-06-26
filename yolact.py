@@ -1,6 +1,7 @@
 import torch, torchvision
 import torch.nn as nn
 import torch.nn.functional as F
+from torch.nn import Sequential as Seq, ReLU
 from torchvision.models.resnet import Bottleneck
 import numpy as np
 from itertools import product
@@ -264,6 +265,30 @@ class PredictionModule(nn.Module):
                 self.priors = prior_cache[size][device]
         
         return self.priors
+class EdgeConv(MessagePassing):
+    def __init__(self, in_channels, out_channels):
+        super().__init__(aggr='max') #  "Max" aggregation.
+        self.nbr_nodes = 4
+        self.adj_matrix = np.ones((self.nbr_nodes, self.nbr_nodes))
+        np.fill_diagonal(self.adj_matrix, 0)
+        self.adj_matrix = torch.tensor(self.adj_matrix).cuda()
+        self.mlp = Seq(Linear(2 * in_channels, out_channels),
+                       ReLU(),
+                       Linear(out_channels, out_channels))
+
+    def forward(self, x):
+        # x has shape [N, in_channels]
+        # edge_index has shape [2, E]
+        edge_index = self.adj_matrix.nonzero().t().contiguous()
+        edge_index, _ = add_self_loops(edge_index, num_nodes=self.nbr_nodes)
+        return self.propagate(edge_index, x=x)[None, :]
+
+    def message(self, x_i, x_j):
+        # x_i has shape [E, in_channels]
+        # x_j has shape [E, in_channels]
+
+        tmp = torch.cat([x_i, x_j - x_i], dim=1)  # tmp has shape [E, 2 * in_channels]
+        return self.mlp(tmp)
 class GCN(MessagePassing):
     def __init__(self, in_channels, out_channels, type="fully_connected"):
         super().__init__(aggr='add')
@@ -296,6 +321,23 @@ class GCN(MessagePassing):
 
     def message(self, x_j, norm):
         return norm.view(-1, 1) * x_j
+
+class EdgeConvs(nn.Module):
+    def __init__(self, in_channels):
+        super().__init__()
+        self.edgeConvs = nn.ModuleList([
+            EdgeConv(x,x)
+            for x in reversed(in_channels)
+        ])
+
+    def forward(self, convouts:List[torch.Tensor]):
+        out = []
+        x = torch.zeros(1, device=convouts[0].device)
+        for i in range(len(convouts)):
+            out.append(x)
+        for i, edgeConv in enumerate(self.edgeConvs):
+            out[i] = edgeConv(convouts[i])
+        return out
 class GCNS(nn.Module):
     def __init__(self, in_channels):
         super().__init__()
@@ -631,7 +673,8 @@ class Yolact(nn.Module):
             with timer.env('fpn'):
                 # Use backbone.selected_layers because we overwrote self.selected_layers
                 outs = [outs[i] for i in cfg.backbone.selected_layers]
-                outs = self.gcns(outs)
+                #outs = self.gcns(outs)
+                outs = self.edgeConvs(outs)
                 outs = self.fpn(outs)
 
 
