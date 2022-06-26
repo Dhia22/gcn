@@ -354,7 +354,7 @@ class FPN(ScriptModuleWrapper):
         self.relu_pred_layers       = cfg.fpn.relu_pred_layers
 
     @script_method_wrapper
-    def forward(self, convouts):
+    def forward(self, convouts:List[torch.Tensor]):
         """
         Args:
             - convouts (list): A list of convouts for the corresponding layers in in_channels.
@@ -632,7 +632,7 @@ class Yolact(nn.Module):
                 outs[1] = self.gcn1(outs[1])
                 #outs[2] = self.gcn2(outs[2])
                 #outs[3] = self.gcn3(outs[3])
-                outs = self.fpn(outs)
+                outs = self.fpn(torch.stack(outs))
 
 
         proto_out = None
