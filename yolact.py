@@ -283,7 +283,7 @@ class GCN(MessagePassing):
     def forward(self, node_feats):
         x = torch.tensor_split(node_feats[0], self.nbr_nodes, dim=0)
         edge_index = self.adj_matrix.nonzero().t().contiguous()
-        #edge_index, _ = add_self_loops(edge_index, num_nodes=self.nbr_nodes)
+        edge_index, _ = add_self_loops(edge_index, num_nodes=self.nbr_nodes)
         x = torch.stack(x)
         x = self.lin(x)
         '''row, col = edge_index
@@ -489,7 +489,7 @@ class Yolact(nn.Module):
 
         self.selected_layers = cfg.backbone.selected_layers
         src_channels = self.backbone.channels
-        in_channels = [44, 22, 11]
+        in_channels = [11, 22, 44]
         if cfg.use_maskiou:
             self.maskiou_net = FastMaskIoUNet()
         if cfg.fpn is not None:
