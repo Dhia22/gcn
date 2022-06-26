@@ -138,11 +138,6 @@ class MultiBoxLoss(nn.Module):
         
         losses = {}
 
-        # Localization Loss (Smooth L1)
-        if cfg.train_boxes:
-            loc_p = loc_data[pos_idx].view(-1, 4)
-            loc_t = loc_t[pos_idx].view(-1, 4)
-            losses['B'] = F.smooth_l1_loss(loc_p, loc_t, reduction='sum') * cfg.bbox_alpha
 
         if cfg.train_masks:
             if cfg.mask_type == mask_type.direct:
@@ -169,38 +164,12 @@ class MultiBoxLoss(nn.Module):
                     elif cfg.mask_proto_loss == 'disj':
                         losses['P'] = -torch.mean(torch.max(F.log_softmax(proto_data, dim=-1), dim=-1)[0])
 
-        # Confidence loss
-        if cfg.use_focal_loss:
-            if cfg.use_sigmoid_focal_loss:
-                losses['C'] = self.focal_conf_sigmoid_loss(conf_data, conf_t)
-            elif cfg.use_objectness_score:
-                losses['C'] = self.focal_conf_objectness_loss(conf_data, conf_t)
-            else:
-                losses['C'] = self.focal_conf_loss(conf_data, conf_t)
-        else:
-            if cfg.use_objectness_score:
-                losses['C'] = self.conf_objectness_loss(conf_data, conf_t, batch_size, loc_p, loc_t, priors)
-            else:
-                losses['C'] = self.ohem_conf_loss(conf_data, conf_t, pos, batch_size)
 
-        # Mask IoU Loss
-        if cfg.use_maskiou and maskiou_targets is not None:
-            losses['I'] = self.mask_iou_loss(net, maskiou_targets)
-
-        # These losses also don't depend on anchors
-        if cfg.use_class_existence_loss:
-            losses['E'] = self.class_existence_loss(predictions['classes'], class_existence_t)
-        if cfg.use_semantic_segmentation_loss:
-            losses['S'] = self.semantic_segmentation_loss(predictions['segm'], masks, labels)
+        losses['I'] = self.mask_iou_loss(net, maskiou_targets)
 
         # Divide all losses by the number of positives.
         # Don't do it for loss[P] because that doesn't depend on the anchors.
-        total_num_pos = num_pos.data.sum().float()
-        for k in losses:
-            if k not in ('P', 'E', 'S'):
-                losses[k] /= total_num_pos
-            else:
-                losses[k] /= batch_size
+
 
         # Loss Key:
         #  - B: Box Localization Loss
