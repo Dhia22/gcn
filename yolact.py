@@ -373,11 +373,14 @@ class FPN(ScriptModuleWrapper):
 
         for i, lat_layer in enumerate(self.lat_layers):
             j -= 1
+            print("01")
+            print(lat_layer(convouts[j]).shape)
+            print(torch.split(convouts[j][0], 128)[0].shape)
             # convouts[j] -> node_feats
             '''node_feats = torch.arange(8, dtype=torch.float32).view(1, 3, 2)
             print(node_feats)
-            adj_matrix = torch.tensor([[[0, 1, 1],
-                                        [1, 0, 1],
+            adj_matrix = torch.tensor([[[0, 0, 0],
+                                        [1, 0, 0],
                                         [1, 1, 0]]])
             with torch.no_grad():
                   convouts[j] = self.gcn_layers[i](self.gcn_layers[-1])(node_feats, adj_matrix)'''
@@ -385,15 +388,17 @@ class FPN(ScriptModuleWrapper):
             if j < len(convouts) - 1:
                 _, _, h, w = convouts[j].size()
                 x = F.interpolate(x, size=(h, w), mode=self.interpolation_mode, align_corners=False)
-            
+
             x = x + lat_layer(convouts[j])
             out[j] = x
-        
+
         # This janky second loop is here because TorchScript.
         j = len(convouts)
         for pred_layer in self.pred_layers:
             j -= 1
             out[j] = pred_layer(out[j])
+            print("02")
+            print(out[j].shape)
             if self.relu_pred_layers:
                 F.relu(out[j], inplace=True)
 
