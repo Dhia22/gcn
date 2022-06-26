@@ -394,8 +394,6 @@ class FPN(ScriptModuleWrapper):
         for pred_layer in self.pred_layers:
             j -= 1
             out[j] = pred_layer(out[j])
-            print("02")
-            print(out[j].shape)
             if self.relu_pred_layers:
                 F.relu(out[j], inplace=True)
 
@@ -637,7 +635,9 @@ class Yolact(nn.Module):
                 #outs[2] = self.gcn2(outs[2])
                 #outs[3] = self.gcn3(outs[3])
                 outs = [outs[i] for i in cfg.backbone.selected_layers]
-                #outs[0] = self.gcn1(outs[0])
+                print(outs.shape)
+                outs[0] = self.gcn1(outs[0])
+                print(outs.shape)
                 outs = self.fpn(outs)
 
 
