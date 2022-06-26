@@ -265,12 +265,15 @@ class GCN(nn.Module):
 
     def __init__(self):
         super().__init__()
+        self.nbr_nodes = 16
+        self.adj_matrix = torch.tensor(np.ones((self.nbr_nodes, self.nbr_nodes))).cuda()
         #self.projection = nn.Linear(c_in, c_out)
 
     def forward(self, node_feats):
         print("01")
-        print(len(torch.tensor_split(node_feats[0], 16, dim=0)))
-        print(torch.tensor_split(node_feats[0], 16, dim=0)[0].shape)
+        print(len(torch.tensor_split(node_feats[0], self.nbr_nodes, dim=0)))
+        print(torch.tensor_split(node_feats[0], self.nbr_nodes, dim=0)[0].shape)
+        print(self.adj_matrix)
         """
         Inputs:
             node_feats - Tensor with node features of shape [batch_size, num_nodes, c_in]
