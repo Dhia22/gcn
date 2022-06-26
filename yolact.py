@@ -294,6 +294,8 @@ class GCN(MessagePassing):
         out = self.propagate(edge_index, x=x, norm=norm)
         out += self.bias
         print(out.shape)
+        out = torch.cat(out)
+        print(out.shape)
         return out
 
     def message(self, x_j, norm):
