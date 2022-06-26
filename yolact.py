@@ -640,7 +640,8 @@ class Yolact(nn.Module):
                 outs = torch.stack(outs, dim=0)'''
                 #outs[2] = self.gcn2(outs[2])
                 #outs[3] = self.gcn3(outs[3])
-                outs = [self.gcn1(outs[i]) for i in cfg.backbone.selected_layers]
+                #outs = [self.gcn1(outs[i]) for i in cfg.backbone.selected_layers]
+                outs = [self.gcn1(outs[i]) for i in [1]]
                 outs = self.fpn(outs)
 
 
