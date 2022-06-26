@@ -283,6 +283,7 @@ class GCN(MessagePassing):
     def forward(self, node_feats):
         edge_index = self.adj_matrix.nonzero().t().contiguous()
         edge_index, _ = add_self_loops(edge_index, num_nodes=self.nbr_nodes)
+        print(node_feats[0].shape)
         x = self.lin(node_feats[0])
         row, col = self.edge_index
         deg = degree(col, x.size(0), dtype=x.dtype)
