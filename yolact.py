@@ -609,17 +609,17 @@ class Yolact(nn.Module):
         
         with timer.env('backbone'):
             outs = self.backbone(x)
-        print("00")
-        print(len(outs))
-        print(outs[0].shape)
-        print(outs[1].shape)
-        print(outs[2].shape)
-        print(outs[3].shape)
         if cfg.fpn is not None:
             with timer.env('fpn'):
                 # Use backbone.selected_layers because we overwrote self.selected_layers
                 outs = [outs[i] for i in cfg.backbone.selected_layers]
+                print("00")
+                print(len(outs))
+                print(outs[0].shape)
+                print(outs[1].shape)
+                print(outs[2].shape)
                 outs = self.fpn(outs)
+
 
         proto_out = None
         if cfg.mask_type == mask_type.lincomb and cfg.eval_mask_branch:
