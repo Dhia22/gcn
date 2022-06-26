@@ -17,6 +17,10 @@ import torch.backends.cudnn as cudnn
 from utils import timer
 from utils.functions import MovingAverage, make_net
 
+from torch.nn import Linear, Parameter
+from torch_geometric.nn import MessagePassing
+from torch_geometric.utils import add_self_loops, degree
+
 # This is required for Pytorch 1.0.1 on Windows to initialize Cuda on some driver versions.
 # See the bug report here: https://github.com/pytorch/pytorch/issues/17108
 torch.cuda.current_device()
@@ -261,37 +265,38 @@ class PredictionModule(nn.Module):
                 self.priors = prior_cache[size][device]
         
         return self.priors
-class GCN(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.dim_node = 16
+class GCN(MessagePassing):
+    def __init__(self, in_channels, out_channels, type="fully_connected"):
+        super().__init__(aggr='add')
+        self.nbr_nodes = 16
+        if type == 'fully_connected':
+            self.adj_matrix = np.ones((self.nbr_nodes, self.nbr_nodes))
+            np.fill_diagonal(self.adj_matrix, 0)
+            self.adj_matrix = torch.tensor(self.adj_matrix).cuda()
+        self.lin = Linear(in_channels, out_channels, bias=False)
+        self.bias = Parameter(torch.Tensor(out_channels))
+        self.reset_parameters()
         #self.projection = nn.Linear(c_in, c_out)
-
+    def reset_parameters(self):
+        self.lin.reset_parameters()
+        self.bias.data.zero_()
     def forward(self, node_feats):
-        print("01")
-        nbr_nodes = int(node_feats[0].shape[0]/self.dim_node)
-        print(nbr_nodes)
-        print(len(torch.tensor_split(node_feats[0], nbr_nodes, dim=0)))
-        print(torch.tensor_split(node_feats[0], nbr_nodes, dim=0)[0].shape)
-        """
-        Inputs:
-            node_feats - Tensor with node features of shape [batch_size, num_nodes, c_in]
-            adj_matrix - Batch of adjacency matrices of the graph. If there is an edge from i to j, adj_matrix[b,i,j]=1 else 0.
-                         Supports directed edges by non-symmetric matrices. Assumes to already have added the identity connections.
-                         Shape: [batch_size, num_nodes, num_nodes]
-        """
-        # Num neighbours = number of incoming edges
-        adj_matrix = np.ones((nbr_nodes, nbr_nodes))
-        np.fill_diagonal(adj_matrix, 0)
-        adj_matrix = torch.tensor(adj_matrix).cuda()
+        row, col, edge_attr = self.adj_matrix.t().coo()
+        edge_index = torch.stack([row, col], dim=0)
+        edge_index, _ = add_self_loops(edge_index, num_nodes=self.nbr_nodes)
+        x = self.lin(node_feats[0])
+        row, col = self.edge_index
+        deg = degree(col, x.size(0), dtype=x.dtype)
+        deg_inv_sqrt = deg.pow(-0.5)
+        deg_inv_sqrt[deg_inv_sqrt == float('inf')] = 0
+        norm = deg_inv_sqrt[row] * deg_inv_sqrt[col]
+        out = self.propagate(self.edge_index, x=x, norm=norm)
+        out += self.bias
+        print(out.shape)
+        return out
 
-        num_neighbours = adj_matrix.sum(dim=-1)
-        node_feats[0] = torch.mm(adj_matrix, node_feats[0])
-        node_feats[0] = node_feats[0] / num_neighbours
-        '''node_feats = self.projection(node_feats)
-        node_feats = torch.bmm(adj_matrix, node_feats)
-        node_feats = node_feats / num_neighbours'''
-        return node_feats
+    def message(self, x_j, norm):
+        return norm.view(-1, 1) * x_j
 class FPN(ScriptModuleWrapper):
     """
     Implements a general version of the FPN introduced in
@@ -486,7 +491,9 @@ class Yolact(nn.Module):
         if cfg.fpn is not None:
             # Some hacky rewiring to accomodate the FPN
             self.fpn = FPN([src_channels[i] for i in self.selected_layers])
-            self.gcn = GCN()
+            self.gcn1 = GCN(44, 44)
+            self.gcn2 = GCN(22, 22)
+            self.gcn3 = GCN(11, 11)
             self.selected_layers = list(range(len(self.selected_layers) + cfg.fpn.num_downsample))
             src_channels = [cfg.fpn.num_features] * len(self.selected_layers)
 
@@ -622,7 +629,9 @@ class Yolact(nn.Module):
         if cfg.fpn is not None:
             with timer.env('fpn'):
                 # Use backbone.selected_layers because we overwrote self.selected_layers
-                outs = [self.gcn(outs[i]) for i in cfg.backbone.selected_layers]
+                outs[0] = self.gcn1(outs[i])
+                outs[1] = self.gcn2(outs[i])
+                outs[2] = self.gcn3(outs[i])
                 outs = self.fpn(outs)
 
 
