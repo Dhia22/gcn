@@ -274,7 +274,7 @@ class GCN(MessagePassing):
             np.fill_diagonal(self.adj_matrix, 0)
             self.adj_matrix = torch.tensor(self.adj_matrix).cuda()
         self.edge_index = self.adj_matrix.nonzero().t().contiguous()
-        self.edge_index, _ = add_self_loops(edge_index, num_nodes=self.nbr_nodes)
+        self.edge_index, _ = add_self_loops(self.edge_index, num_nodes=self.nbr_nodes)
         self.lin = Linear(in_channels, out_channels, bias=False)
         self.bias = Parameter(torch.Tensor(out_channels))
         self.reset_parameters()
