@@ -273,6 +273,7 @@ class GCN(MessagePassing):
             self.adj_matrix = np.ones((self.nbr_nodes, self.nbr_nodes))
             np.fill_diagonal(self.adj_matrix, 0)
             self.adj_matrix = torch.tensor(self.adj_matrix).cuda()
+        print(in_channels)
         self.lin = Linear(in_channels, out_channels, bias=False)
         self.bias = Parameter(torch.Tensor(out_channels))
         self.reset_parameters()
