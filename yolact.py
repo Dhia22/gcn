@@ -636,6 +636,7 @@ class Yolact(nn.Module):
                 '''outs[1] = self.gcn1(outs[1])
                 outs[2] = self.gcn2(outs[2])
                 outs[3] = self.gcn3(outs[3])'''
+                print(outs.shape)
                 outs = self.fpn(outs)
 
 
