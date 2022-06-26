@@ -284,7 +284,7 @@ class GCN(nn.Module):
         """
         # Num neighbours = number of incoming edges
         num_neighbours = self.adj_matrix.sum(dim=-1)
-        node_feats[0] = torch.mm(adj_matrix, node_feats[0])
+        node_feats[0] = torch.mm(self.adj_matrix, node_feats[0])
         node_feats[0] = node_feats[0] / num_neighbours
         '''node_feats = self.projection(node_feats)
         node_feats = torch.bmm(adj_matrix, node_feats)
