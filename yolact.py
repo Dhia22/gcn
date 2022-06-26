@@ -276,8 +276,6 @@ class GCN(MessagePassing):
         self.edge_index = self.adj_matrix.nonzero().t().contiguous()
         self.edge_index, _ = add_self_loops(self.edge_index, num_nodes=self.nbr_nodes)
         self.row, self.col = self.edge_index
-        print(self.row)
-        print(self.col)
         self.lin = Linear(in_channels, out_channels, bias=False)
         self.bias = Parameter(torch.Tensor(out_channels))
         self.reset_parameters()
@@ -286,15 +284,14 @@ class GCN(MessagePassing):
         self.lin.reset_parameters()
         self.bias.data.zero_()
     def forward(self, node_feats):
-        x = torch.tensor_split(node_feats[0], self.nbr_nodes, dim=0)
-        x = torch.stack(x)
-        x = self.lin(x)
-
-        deg = degree(self.col, x.size(0), dtype=x.dtype)
+        self.x = torch.tensor_split(node_feats[0], self.nbr_nodes, dim=0)
+        self.x = torch.stack(self.x)
+        self.x = self.lin(self.x)
+        deg = degree(self.col, self.x.size(0), dtype=self.x.dtype)
         deg_inv_sqrt = deg.pow(-0.5)
         deg_inv_sqrt[deg_inv_sqrt == float('inf')] = 0
         norm = deg_inv_sqrt[self.row] * deg_inv_sqrt[self.col]
-        out = self.propagate(self.edge_index, x=x, norm=norm)
+        out = self.propagate(self.edge_index, x=self.x, norm=norm)
         out += self.bias
         out = out.reshape(out.shape[0]*out.shape[1],out.shape[2],out.shape[3])
         return out
