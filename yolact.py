@@ -273,7 +273,6 @@ class GCN(MessagePassing):
             self.adj_matrix = np.ones((self.nbr_nodes, self.nbr_nodes))
             np.fill_diagonal(self.adj_matrix, 0)
             self.adj_matrix = torch.tensor(self.adj_matrix).cuda()
-            print(self.adj_matrix)
         self.lin = Linear(in_channels, out_channels, bias=False)
         self.bias = Parameter(torch.Tensor(out_channels))
         self.reset_parameters()
@@ -284,18 +283,18 @@ class GCN(MessagePassing):
     def forward(self, node_feats):
         x = torch.tensor_split(node_feats[0], self.nbr_nodes, dim=0)
         edge_index = self.adj_matrix.nonzero().t().contiguous()
-        edge_index, _ = add_self_loops(edge_index, num_nodes=self.nbr_nodes)
+        #edge_index, _ = add_self_loops(edge_index, num_nodes=self.nbr_nodes)
         x = torch.stack(x)
         x = self.lin(x)
-        row, col = edge_index
+        '''row, col = edge_index
         deg = degree(col, x.size(0), dtype=x.dtype)
         deg_inv_sqrt = deg.pow(-0.5)
         deg_inv_sqrt[deg_inv_sqrt == float('inf')] = 0
         norm = deg_inv_sqrt[row] * deg_inv_sqrt[col]
         out = self.propagate(edge_index, x=x, norm=norm)
         out += self.bias
-        out = out.reshape(out.shape[0]*out.shape[1],out.shape[2],out.shape[3])
-        return out
+        out = out.reshape(out.shape[0]*out.shape[1],out.shape[2],out.shape[3])'''
+        return x
 
     def message(self, x_j, norm):
         return norm.view(-1, 1) * x_j
