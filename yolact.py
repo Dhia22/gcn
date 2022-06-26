@@ -303,7 +303,7 @@ class GCNS(nn.Module):
             GCN(x,x)
             for x in reversed(in_channels)
         ])
-    @script_method_wrapper
+
     def forward(self, convouts:List[torch.Tensor]):
         out = []
         x = torch.zeros(1, device=convouts[0].device)
@@ -356,7 +356,8 @@ class FPN(nn.Module):
         self.relu_downsample_layers = cfg.fpn.relu_downsample_layers
         self.relu_pred_layers       = cfg.fpn.relu_pred_layers
 
-    @script_method_wrapper
+
+
     def forward(self, convouts:List[torch.Tensor]):
         """
         Args:
