@@ -284,7 +284,8 @@ class GCN(MessagePassing):
         x = torch.tensor_split(node_feats[0], self.nbr_nodes, dim=0)
         edge_index = self.adj_matrix.nonzero().t().contiguous()
         edge_index, _ = add_self_loops(edge_index, num_nodes=self.nbr_nodes)
-        print(x.shape)
+        print(len(x))
+        print(x[0].shape)
         x = self.lin(x)
         row, col = edge_index
         deg = degree(col, x.size(0), dtype=x.dtype)
