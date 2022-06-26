@@ -636,8 +636,7 @@ class Yolact(nn.Module):
                 #outs[3] = self.gcn3(outs[3])
                 outs = [outs[i] for i in cfg.backbone.selected_layers]
                 print(len(outs))
-                outs[0] = self.gcn1(outs[0])
-                print(len(outs))
+                #outs[0] = self.gcn1(outs[0])
                 outs = self.fpn(outs)
 
 
