@@ -475,10 +475,7 @@ class Yolact(nn.Module):
         if cfg.use_maskiou:
             self.maskiou_net = FastMaskIoUNet()
         print('00')
-        print(src_channels[0].shape)
-        print(src_channels[1].shape)
-        print(src_channels[2].shape)
-        print(src_channels[3].shape)
+        print(src_channels)
         if cfg.fpn is not None:
             # Some hacky rewiring to accomodate the FPN
             self.fpn = FPN([src_channels[i] for i in self.selected_layers])
