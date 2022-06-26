@@ -294,7 +294,7 @@ class GCN(MessagePassing):
         out = self.propagate(edge_index, x=x, norm=norm)
         out += self.bias
         print(out.shape)
-        out = torch.stack(torch.tensor_split(out, 1, dim=0),dim=0)
+        out = out.reshape(out.shape[0]*out.shape[1],out.shape[2],out.shape[3])
         print(out.shape)
         return out
 
