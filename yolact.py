@@ -269,7 +269,7 @@ class GCN(nn.Module):
 
     def forward(self, node_feats):
         print("01")
-        self.nbr_nodes = node_feats[0]/self.dim_node
+        self.nbr_nodes = node_feats[0].shape[0]/self.dim_node
         print(self.nbr_nodes)
         print(len(torch.tensor_split(node_feats[0], self.nbr_node, dim=0)))
         print(torch.tensor_split(node_feats[0], self.nbr_nodes, dim=0)[0].shape)
