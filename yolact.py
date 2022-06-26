@@ -261,13 +261,13 @@ class PredictionModule(nn.Module):
                 self.priors = prior_cache[size][device]
         
         return self.priors
-class GCNLayer(nn.Module):
+class GCN(nn.Module):
 
-    def __init__(self, c_in, c_out):
+    def __init__(self):
         super().__init__()
-        self.projection = nn.Linear(c_in, c_out)
+        #self.projection = nn.Linear(c_in, c_out)
 
-    def forward(self, node_feats, adj_matrix):
+    def forward(self, node_feats):
         """
         Inputs:
             node_feats - Tensor with node features of shape [batch_size, num_nodes, c_in]
@@ -276,10 +276,10 @@ class GCNLayer(nn.Module):
                          Shape: [batch_size, num_nodes, num_nodes]
         """
         # Num neighbours = number of incoming edges
-        num_neighbours = adj_matrix.sum(dim=-1)
+        '''num_neighbours = adj_matrix.sum(dim=-1)
         node_feats = self.projection(node_feats)
         node_feats = torch.bmm(adj_matrix, node_feats)
-        node_feats = node_feats / num_neighbours
+        node_feats = node_feats / num_neighbours'''
         return node_feats
 class FPN(ScriptModuleWrapper):
     """
@@ -477,6 +477,7 @@ class Yolact(nn.Module):
         if cfg.fpn is not None:
             # Some hacky rewiring to accomodate the FPN
             self.fpn = FPN([src_channels[i] for i in self.selected_layers])
+            self.gcn = GCN()
             self.selected_layers = list(range(len(self.selected_layers) + cfg.fpn.num_downsample))
             src_channels = [cfg.fpn.num_features] * len(self.selected_layers)
 
@@ -612,12 +613,7 @@ class Yolact(nn.Module):
         if cfg.fpn is not None:
             with timer.env('fpn'):
                 # Use backbone.selected_layers because we overwrote self.selected_layers
-                outs = [outs[i] for i in cfg.backbone.selected_layers]
-                print("00")
-                print(len(outs))
-                print(outs[0].shape)
-                print(outs[1].shape)
-                print(outs[2].shape)
+                outs = [self.gcn(outs[i]) for i in cfg.backbone.selected_layers]
                 outs = self.fpn(outs)
 
 
