@@ -621,13 +621,6 @@ class Yolact(nn.Module):
 
                 module.weight.requires_grad = enable
                 module.bias.requires_grad = enable
-    def gcn(out, i):
-        if i==1:
-            return out
-        if i==2:
-            return out
-        if i==3:
-            return out
     def forward(self, x):
         """ The input should be of size [batch_size, 3, img_h, img_w] """
         _, _, img_h, img_w = x.size()
@@ -653,7 +646,7 @@ class Yolact(nn.Module):
                         return out
                     if i == 3:
                         return out
-                outs = [gcn(outs[i],i) for i in cfg.backbone.selected_layers]
+                outs = [outs[i] for i in cfg.backbone.selected_layers]
                 outs = self.fpn(outs)
 
 
