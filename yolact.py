@@ -281,8 +281,7 @@ class GCN(MessagePassing):
         self.lin.reset_parameters()
         self.bias.data.zero_()
     def forward(self, node_feats):
-        row, col, edge_attr = self.adj_matrix.t().coo()
-        edge_index = torch.stack([row, col], dim=0)
+        edge_index = self.adj_matrix.nonzero().t().contiguous()
         edge_index, _ = add_self_loops(edge_index, num_nodes=self.nbr_nodes)
         x = self.lin(node_feats[0])
         row, col = self.edge_index
