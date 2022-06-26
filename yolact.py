@@ -294,7 +294,7 @@ class GCN(MessagePassing):
         out = self.propagate(edge_index, x=x, norm=norm)
         out += self.bias
         print(out.shape)
-        out = torch.cat(torch.tensor_split(out, 1, dim=0))
+        out = torch.cat(torch.tensor_split(out, 1, dim=0),dim=0)
         print(out.shape)
         return out
 
