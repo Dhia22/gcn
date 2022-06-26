@@ -623,7 +623,7 @@ class Yolact(nn.Module):
                 module.bias.requires_grad = enable
     def gcn(out, i):
         if i==1:
-            return self.gcn1(out)
+            return out
         if i==2:
             return out
         if i==3:
