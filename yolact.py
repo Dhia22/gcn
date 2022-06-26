@@ -285,12 +285,12 @@ class GCN(MessagePassing):
         edge_index, _ = add_self_loops(edge_index, num_nodes=self.nbr_nodes)
         print(node_feats[0].shape)
         x = self.lin(node_feats[0])
-        row, col = self.edge_index
+        row, col = edge_index
         deg = degree(col, x.size(0), dtype=x.dtype)
         deg_inv_sqrt = deg.pow(-0.5)
         deg_inv_sqrt[deg_inv_sqrt == float('inf')] = 0
         norm = deg_inv_sqrt[row] * deg_inv_sqrt[col]
-        out = self.propagate(self.edge_index, x=x, norm=norm)
+        out = self.propagate(edge_index, x=x, norm=norm)
         out += self.bias
         print(out.shape)
         return out
