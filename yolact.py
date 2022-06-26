@@ -628,7 +628,10 @@ class Yolact(nn.Module):
         if cfg.fpn is not None:
             with timer.env('fpn'):
                 # Use backbone.selected_layers because we overwrote self.selected_layers
-                outs = self.fpn(outs)
+                outs[1] = self.gcn1(outs[1])
+                #outs[2] = self.gcn2(outs[2])
+                #outs[3] = self.gcn3(outs[3])
+                outs = self.fpn(torch.FloatTensor(outs))
 
 
         proto_out = None
