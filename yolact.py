@@ -294,9 +294,8 @@ class GCN(MessagePassing):
         out = self.propagate(edge_index, x=x, norm=norm)
         out += self.bias
         print(out.shape)
-        out = torch.unsqueeze(out.reshape(out.shape[0]*out.shape[1],out.shape[2],out.shape[3]), dim=0)
-        print(out.shape)
-        return out
+        out = out.reshape(out.shape[0]*out.shape[1],out.shape[2],out.shape[3])
+        return [out]
 
     def message(self, x_j, norm):
         return norm.view(-1, 1) * x_j
@@ -633,10 +632,9 @@ class Yolact(nn.Module):
         if cfg.fpn is not None:
             with timer.env('fpn'):
                 # Use backbone.selected_layers because we overwrote self.selected_layers
-                '''outs[1] = self.gcn1(outs[1])
+                outs[1] = self.gcn1(outs[1])
                 outs[2] = self.gcn2(outs[2])
-                outs[3] = self.gcn3(outs[3])'''
-                print(outs.shape)
+                outs[3] = self.gcn3(outs[3])
                 outs = self.fpn(outs)
 
 
