@@ -474,9 +474,6 @@ class Yolact(nn.Module):
 
         if cfg.use_maskiou:
             self.maskiou_net = FastMaskIoUNet()
-        print('00')
-        print(len(self.selected_layers))
-        print(self.selected_layers)
         if cfg.fpn is not None:
             # Some hacky rewiring to accomodate the FPN
             self.fpn = FPN([src_channels[i] for i in self.selected_layers])
@@ -612,7 +609,8 @@ class Yolact(nn.Module):
         
         with timer.env('backbone'):
             outs = self.backbone(x)
-
+        print("00")
+        print(outs.shape)
         if cfg.fpn is not None:
             with timer.env('fpn'):
                 # Use backbone.selected_layers because we overwrote self.selected_layers
