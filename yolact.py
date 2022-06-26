@@ -282,17 +282,16 @@ class GCN(MessagePassing):
         self.bias.data.zero_()
     def forward(self, node_feats):
         x = torch.tensor_split(node_feats[0], self.nbr_nodes, dim=0)
-        edge_index = self.adj_matrix.nonzero().t().contiguous()
-        edge_index, _ = add_self_loops(edge_index, num_nodes=self.nbr_nodes)
+        self.edge_index = self.adj_matrix.nonzero().t().contiguous()
+        self.edge_index, _ = add_self_loops(edge_index, num_nodes=self.nbr_nodes)
         x = torch.stack(x)
         x = self.lin(x)
-        print(edge_index)
-        row, col = edge_index
+        row, col = self.edge_index
         deg = degree(col, x.size(0), dtype=x.dtype)
         deg_inv_sqrt = deg.pow(-0.5)
         deg_inv_sqrt[deg_inv_sqrt == float('inf')] = 0
         norm = deg_inv_sqrt[row] * deg_inv_sqrt[col]
-        out = self.propagate(edge_index, x=x, norm=norm)
+        out = self.propagate(self.edge_index, x=x, norm=norm)
         out += self.bias
         out = out.reshape(out.shape[0]*out.shape[1],out.shape[2],out.shape[3])
         return out
