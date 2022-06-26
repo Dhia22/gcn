@@ -629,7 +629,7 @@ class Yolact(nn.Module):
             with timer.env('fpn'):
                 # Use backbone.selected_layers because we overwrote self.selected_layers
                 outs1 = self.gcn1(outs[1])
-                outs = torch.cat([outs1,outs[2],outs[3]],dim=3)
+                outs = torch.stack([outs1,outs[2],outs[3]],dim=3)
                 #outs[2] = self.gcn2(outs[2])
                 #outs[3] = self.gcn3(outs[3])
                 outs = self.fpn(outs)
