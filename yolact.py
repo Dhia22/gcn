@@ -373,9 +373,6 @@ class FPN(ScriptModuleWrapper):
 
         for i, lat_layer in enumerate(self.lat_layers):
             j -= 1
-            print("01")
-            print(lat_layer(convouts[j]).shape)
-            print(torch.split(convouts[j][0], 128)[0].shape)
             # convouts[j] -> node_feats
             '''node_feats = torch.arange(8, dtype=torch.float32).view(1, 3, 2)
             print(node_feats)
@@ -647,6 +644,7 @@ class Yolact(nn.Module):
                     if i == 3:
                         return out
                 outs = [outs[i] for i in cfg.backbone.selected_layers]
+                outs[1] = self.gcn1(outs[1])
                 outs = self.fpn(outs)
 
 
