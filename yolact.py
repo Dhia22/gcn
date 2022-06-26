@@ -632,7 +632,7 @@ class Yolact(nn.Module):
                 outs[1] = self.gcn1(outs[1])
                 #outs[2] = self.gcn2(outs[2])
                 #outs[3] = self.gcn3(outs[3])
-                outs = self.fpn(torch.FloatTensor(outs))
+                outs = self.fpn(outs)
 
 
         proto_out = None
