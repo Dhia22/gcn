@@ -294,7 +294,7 @@ class GCN(MessagePassing):
         out = self.propagate(edge_index, x=x, norm=norm)
         out += self.bias
         out = out.reshape(out.shape[0]*out.shape[1],out.shape[2],out.shape[3])
-        return [out]
+        return out
 
     def message(self, x_j, norm):
         return norm.view(-1, 1) * x_j
@@ -638,7 +638,6 @@ class Yolact(nn.Module):
                 #outs[3] = self.gcn3(outs[3])
                 outs = [outs[i] for i in cfg.backbone.selected_layers]
                 outs[0] = self.gcn1(outs[0])
-                print(type(outs[1]))
                 outs = self.fpn(outs)
 
 
