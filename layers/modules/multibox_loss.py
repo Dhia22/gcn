@@ -190,14 +190,13 @@ class MultiBoxLoss(nn.Module):
         # These losses also don't depend on anchors
         if cfg.use_class_existence_loss:
             losses['E'] = self.class_existence_loss(predictions['classes'], class_existence_t)
-        if cfg.use_semantic_segmentation_loss:
-            losses['S'] = self.semantic_segmentation_loss(predictions['segm'], masks, labels)
+
 
         # Divide all losses by the number of positives.
         # Don't do it for loss[P] because that doesn't depend on the anchors.
         total_num_pos = num_pos.data.sum().float()
         for k in losses:
-            if k not in ('P', 'E', 'S'):
+            if k not in ('P', 'E' ):
                 losses[k] /= total_num_pos
             else:
                 losses[k] /= batch_size
