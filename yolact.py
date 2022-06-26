@@ -271,7 +271,7 @@ class GCN(nn.Module):
         print("01")
         nbr_nodes = node_feats[0].shape[0]/self.dim_node
         print(nbr_nodes)
-        print(len(torch.tensor_split(node_feats[0], nbr_node, dim=0)))
+        print(len(torch.tensor_split(node_feats[0], nbr_nodes, dim=0)))
         print(torch.tensor_split(node_feats[0], nbr_nodes, dim=0)[0].shape)
         """
         Inputs:
