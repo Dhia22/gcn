@@ -165,7 +165,7 @@ class MultiBoxLoss(nn.Module):
                         losses['P'] = -torch.mean(torch.max(F.log_softmax(proto_data, dim=-1), dim=-1)[0])
 
 
-        losses['I'] = self.mask_iou_loss(net, maskiou_targets)
+
 
         # Divide all losses by the number of positives.
         # Don't do it for loss[P] because that doesn't depend on the anchors.
