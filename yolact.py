@@ -354,7 +354,7 @@ class FPN(ScriptModuleWrapper):
         self.relu_pred_layers       = cfg.fpn.relu_pred_layers
 
     @script_method_wrapper
-    def forward(self, convouts:List[torch.Tensor]):
+    def forward(self, convouts):
         """
         Args:
             - convouts (list): A list of convouts for the corresponding layers in in_channels.
@@ -394,8 +394,6 @@ class FPN(ScriptModuleWrapper):
         for pred_layer in self.pred_layers:
             j -= 1
             out[j] = pred_layer(out[j])
-            '''print("02")
-            print(out[j].shape)'''
             if self.relu_pred_layers:
                 F.relu(out[j], inplace=True)
 
