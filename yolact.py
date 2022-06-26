@@ -493,8 +493,8 @@ class Yolact(nn.Module):
             # Some hacky rewiring to accomodate the FPN
             self.fpn = FPN([src_channels[i] for i in self.selected_layers])
             self.gcn1 = GCN(44, 44)
-            self.gcn2 = GCN(22, 22)
-            self.gcn3 = GCN(11, 11)
+            #self.gcn2 = GCN(22, 22)
+            #self.gcn3 = GCN(11, 11)
             self.selected_layers = list(range(len(self.selected_layers) + cfg.fpn.num_downsample))
             src_channels = [cfg.fpn.num_features] * len(self.selected_layers)
 
@@ -632,8 +632,8 @@ class Yolact(nn.Module):
             with timer.env('fpn'):
                 # Use backbone.selected_layers because we overwrote self.selected_layers
                 outs[1] = self.gcn1(outs[1])
-                outs[2] = self.gcn2(outs[2])
-                outs[3] = self.gcn3(outs[3])
+                #outs[2] = self.gcn2(outs[2])
+                #outs[3] = self.gcn3(outs[3])
                 outs = self.fpn(outs)
 
 
