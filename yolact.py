@@ -297,7 +297,7 @@ class GCN(MessagePassing):
 
     def message(self, x_j, norm):
         return norm.view(-1, 1) * x_j
-class GCNS():
+class GCNS(nn.Module):
     def __init__(self, in_channels):
         super().__init__()
         self.gcns  = nn.ModuleList([
