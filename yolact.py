@@ -612,6 +612,9 @@ class Yolact(nn.Module):
         print("00")
         print(len(outs))
         print(outs[0].shape)
+        print(outs[1].shape)
+        print(outs[2].shape)
+        print(outs[3].shape)
         if cfg.fpn is not None:
             with timer.env('fpn'):
                 # Use backbone.selected_layers because we overwrote self.selected_layers
