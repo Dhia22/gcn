@@ -262,13 +262,13 @@ class PredictionModule(nn.Module):
         
         return self.priors
 class GCN(nn.Module):
-
-    def __init__(self):
+    def __init__(self, type="fully_connected"):
         super().__init__()
         self.nbr_nodes = 16
-        self.adj_matrix = np.ones((self.nbr_nodes, self.nbr_nodes))
-        np.fill_diagonal(self.adj_matrix, 0)
-        self.adj_matrix = torch.tensor(self.adj_matrix).cuda()
+        if type == 'fully_connected':
+            self.adj_matrix = np.ones((self.nbr_nodes, self.nbr_nodes))
+            np.fill_diagonal(self.adj_matrix, 0)
+            self.adj_matrix = torch.tensor(self.adj_matrix).cuda()
         #self.projection = nn.Linear(c_in, c_out)
 
     def forward(self, node_feats):
@@ -284,8 +284,9 @@ class GCN(nn.Module):
                          Shape: [batch_size, num_nodes, num_nodes]
         """
         # Num neighbours = number of incoming edges
-        '''num_neighbours = adj_matrix.sum(dim=-1)
-        node_feats = self.projection(node_feats)
+        num_neighbours = self.adj_matrix.sum(dim=-1)
+        print(num_neighbours)
+        '''node_feats = self.projection(node_feats)
         node_feats = torch.bmm(adj_matrix, node_feats)
         node_feats = node_feats / num_neighbours'''
         return node_feats
