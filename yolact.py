@@ -356,11 +356,8 @@ class FPN(ScriptModuleWrapper):
 
         for i, lat_layer in enumerate(self.lat_layers):
             j -= 1
-            '''print("01")
-            print(lat_layer(convouts[j]).shape)
-            print(torch.split(convouts[j][0], int(lat_layer(convouts[j]).shape[1]/3))[0].shape)
-            print(torch.split(convouts[j][0], int(lat_layer(convouts[j]).shape[1]/3))[1].shape)
-            print(torch.split(convouts[j][0], int(lat_layer(convouts[j]).shape[1] / 3))[2].shape)'''
+            print("01")
+            print(convouts[j].shape)
             # convouts[j] -> node_feats
             '''node_feats = torch.arange(8, dtype=torch.float32).view(1, 3, 2)
             print(node_feats)
