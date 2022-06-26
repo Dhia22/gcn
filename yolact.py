@@ -354,7 +354,7 @@ class FPN(ScriptModuleWrapper):
         self.relu_pred_layers       = cfg.fpn.relu_pred_layers
 
     @script_method_wrapper
-    def forward(self, convouts:List[torch.Tensor]):
+    def forward(self, convouts):
         """
         Args:
             - convouts (list): A list of convouts for the corresponding layers in in_channels.
