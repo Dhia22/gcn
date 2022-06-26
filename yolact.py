@@ -268,6 +268,7 @@ class GCN(nn.Module):
         #self.projection = nn.Linear(c_in, c_out)
 
     def forward(self, node_feats):
+        print(torch.tensor_split(node_feats, 16, dim=0)[0].shape)
         """
         Inputs:
             node_feats - Tensor with node features of shape [batch_size, num_nodes, c_in]
