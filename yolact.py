@@ -621,7 +621,7 @@ class Yolact(nn.Module):
 
                 module.weight.requires_grad = enable
                 module.bias.requires_grad = enable
-    def gcn(self,out, i):
+    def gcn(out, i):
         if i==1:
             return self.gcn1(out)
         if i==2:
@@ -646,7 +646,14 @@ class Yolact(nn.Module):
                 outs = torch.stack(outs, dim=0)'''
                 #outs[2] = self.gcn2(outs[2])
                 #outs[3] = self.gcn3(outs[3])
-                outs = [this.gcn(outs[i],i) for i in cfg.backbone.selected_layers]
+                def gcn(out, i):
+                    if i == 1:
+                        return self.gcn1(out)
+                    if i == 2:
+                        return out
+                    if i == 3:
+                        return out
+                outs = [gcn(outs[i],i) for i in cfg.backbone.selected_layers]
                 outs = self.fpn(outs)
 
 
