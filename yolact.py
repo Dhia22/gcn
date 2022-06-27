@@ -268,7 +268,7 @@ class PredictionModule(nn.Module):
 class EdgeConv(MessagePassing):
     def __init__(self, in_channels, out_channels):
         super().__init__(aggr='max') #  "Max" aggregation.
-        self.nbr_nodes = 4
+        self.nbr_nodes = 16
         self.adj_matrix = np.ones((self.nbr_nodes, self.nbr_nodes))
         np.fill_diagonal(self.adj_matrix, 0)
         self.adj_matrix = torch.tensor(self.adj_matrix).cuda()
@@ -537,6 +537,7 @@ class Yolact(nn.Module):
             # Some hacky rewiring to accomodate the FPN
             self.fpn = FPN([src_channels[i] for i in self.selected_layers])
             self.gcns = GCNS(in_channels)
+            self.gcn = GCN(3, 3)
             self.edgeConvs = EdgeConvs(in_channels)
             self.selected_layers = list(range(len(self.selected_layers) + cfg.fpn.num_downsample))
             src_channels = [cfg.fpn.num_features] * len(self.selected_layers)
@@ -666,7 +667,7 @@ class Yolact(nn.Module):
         _, _, img_h, img_w = x.size()
         cfg._tmp_img_h = img_h
         cfg._tmp_img_w = img_w
-        
+        x = self.gcn(x)
         with timer.env('backbone'):
             outs = self.backbone(x)
         #outs = list(outs)
@@ -674,7 +675,7 @@ class Yolact(nn.Module):
             with timer.env('fpn'):
                 # Use backbone.selected_layers because we overwrote self.selected_layers
                 outs = [outs[i] for i in cfg.backbone.selected_layers]
-                outs = self.gcns(outs)
+                #outs = self.gcns(outs)
                 #outs = self.edgeConvs(outs)
                 outs = self.fpn(outs)
 
