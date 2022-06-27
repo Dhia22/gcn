@@ -537,7 +537,7 @@ class Yolact(nn.Module):
             # Some hacky rewiring to accomodate the FPN
             self.fpn = FPN([src_channels[i] for i in self.selected_layers])
             self.gcns = GCNS(in_channels)
-            self.gcn = GCN(3, 3)
+            self.gcn = GCN(350, 350)
             self.edgeConvs = EdgeConvs(in_channels)
             self.selected_layers = list(range(len(self.selected_layers) + cfg.fpn.num_downsample))
             src_channels = [cfg.fpn.num_features] * len(self.selected_layers)
