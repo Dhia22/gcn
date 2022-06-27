@@ -672,7 +672,7 @@ class Yolact(nn.Module):
         _, _, img_h, img_w = x.size()
         cfg._tmp_img_h = img_h
         cfg._tmp_img_w = img_w
-        print(x.shape)
+        print(x[0].shape)
         x = self.gcn(x[0])
         with timer.env('backbone'):
             outs = self.backbone(x)
