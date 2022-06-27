@@ -316,7 +316,8 @@ class GCN(MessagePassing):
         norm = deg_inv_sqrt[row] * deg_inv_sqrt[col]
         out = self.propagate(edge_index, x=x, norm=norm)
         out += self.bias
-        out = out.reshape(out.shape[0]*out.shape[1],out.shape[2],out.shape[3])
+        print(out.shape)
+        #out = out.reshape(out.shape[0]*out.shape[1],out.shape[2],out.shape[3])
         return out[None, :]
 
     def message(self, x_j, norm):
