@@ -292,7 +292,7 @@ class EdgeConv(MessagePassing):
 class GCN(MessagePassing):
     def __init__(self, in_channels, out_channels, type="fully_connected"):
         super().__init__(aggr='add')
-        self.nbr_nodes = 10
+        self.nbr_nodes = 3
         if type == 'fully_connected':
             self.adj_matrix = np.ones((self.nbr_nodes, self.nbr_nodes))
             np.fill_diagonal(self.adj_matrix, 0)
@@ -316,13 +316,8 @@ class GCN(MessagePassing):
         norm = deg_inv_sqrt[row] * deg_inv_sqrt[col]
         out = self.propagate(edge_index, x=x, norm=norm)
         out += self.bias
-        if len(out.shape) == 3:
-            out = out.reshape(out.shape[0] * out.shape[1], out.shape[2])
-            print(out[None,None, :].shape)
-            return out[None,None, :]
-        else:
-            out = out.reshape(out.shape[0]*out.shape[1],out.shape[2],out.shape[3])
-            return out[None, :]
+        out = out.reshape(out.shape[0]*out.shape[1],out.shape[2],out.shape[3])
+        return out[None, :]
 
     def message(self, x_j, norm):
         return norm.view(-1, 1) * x_j
@@ -672,8 +667,7 @@ class Yolact(nn.Module):
         _, _, img_h, img_w = x.size()
         cfg._tmp_img_h = img_h
         cfg._tmp_img_w = img_w
-        print(x[0].shape)
-        x = self.gcn(x[0])
+        x = self.gcn(x)
         with timer.env('backbone'):
             outs = self.backbone(x)
         #outs = list(outs)
