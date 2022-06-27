@@ -316,9 +316,13 @@ class GCN(MessagePassing):
         norm = deg_inv_sqrt[row] * deg_inv_sqrt[col]
         out = self.propagate(edge_index, x=x, norm=norm)
         out += self.bias
-        out = out.reshape(out.shape[0] * out.shape[1], out.shape[2])
-        #out = out.reshape(out.shape[0]*out.shape[1],out.shape[2],out.shape[3])
-        return out[None,None, :]
+        if len(out.shape) == 3:
+            out = out.reshape(out.shape[0] * out.shape[1], out.shape[2])
+            print(out[None,None, :].shape)
+            return out[None,None, :]
+        else:
+            out = out.reshape(out.shape[0]*out.shape[1],out.shape[2],out.shape[3])
+            return out[None, :]
 
     def message(self, x_j, norm):
         return norm.view(-1, 1) * x_j
