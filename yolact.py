@@ -272,7 +272,7 @@ class EdgeConv(MessagePassing):
         self.adj_matrix = np.ones((self.nbr_nodes, self.nbr_nodes))
         np.fill_diagonal(self.adj_matrix, 0)
         self.adj_matrix = torch.tensor(self.adj_matrix).cuda()
-        self.mlp = Seq(Linear(2 * in_channels, out_channels),
+        self.mlp = Seq(Linear(in_channels, out_channels),
                        ReLU(),
                        Linear(out_channels, out_channels))
 
