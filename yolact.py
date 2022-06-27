@@ -674,8 +674,8 @@ class Yolact(nn.Module):
             with timer.env('fpn'):
                 # Use backbone.selected_layers because we overwrote self.selected_layers
                 outs = [outs[i] for i in cfg.backbone.selected_layers]
-                #outs = self.gcns(outs)
-                outs = self.edgeConvs(outs)
+                outs = self.gcns(outs)
+                #outs = self.edgeConvs(outs)
                 outs = self.fpn(outs)
 
 
