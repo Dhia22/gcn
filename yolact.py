@@ -268,7 +268,7 @@ class PredictionModule(nn.Module):
 class EdgeConv(MessagePassing):
     def __init__(self, in_channels, out_channels):
         super().__init__(aggr='max') #  "Max" aggregation.
-        self.nbr_nodes = 10
+        self.nbr_nodes = 4
         self.adj_matrix = np.ones((self.nbr_nodes, self.nbr_nodes))
         np.fill_diagonal(self.adj_matrix, 0)
         self.adj_matrix = torch.tensor(self.adj_matrix).cuda()
@@ -292,7 +292,7 @@ class EdgeConv(MessagePassing):
 class GCN(MessagePassing):
     def __init__(self, in_channels, out_channels, type="fully_connected"):
         super().__init__(aggr='add')
-        self.nbr_nodes = 4
+        self.nbr_nodes = 10
         if type == 'fully_connected':
             self.adj_matrix = np.ones((self.nbr_nodes, self.nbr_nodes))
             np.fill_diagonal(self.adj_matrix, 0)
