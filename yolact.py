@@ -308,7 +308,7 @@ class GCN(MessagePassing):
         edge_index = self.adj_matrix.nonzero().t().contiguous()
         edge_index, _ = add_self_loops(edge_index, num_nodes=self.nbr_nodes)
         x = torch.stack(x)
-        x = self.lin(x)
+        #x = self.lin(x)
         row, col = edge_index
         deg = degree(col, x.size(0), dtype=x.dtype)
         deg_inv_sqrt = deg.pow(-0.5)
@@ -667,7 +667,7 @@ class Yolact(nn.Module):
         _, _, img_h, img_w = x.size()
         cfg._tmp_img_h = img_h
         cfg._tmp_img_w = img_w
-        #x = self.gcn(x)
+        x = self.gcn(x)
         with timer.env('backbone'):
             outs = self.backbone(x)
         #outs = list(outs)
