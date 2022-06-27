@@ -281,7 +281,7 @@ class EdgeConv(MessagePassing):
         # edge_index has shape [2, E]
         edge_index = self.adj_matrix.nonzero().t().contiguous()
         edge_index, _ = add_self_loops(edge_index, num_nodes=self.nbr_nodes)
-        return self.propagate(edge_index, x=x)[None, :]
+        return self.propagate(edge_index, x=x)
 
     def message(self, x_i, x_j):
         # x_i has shape [E, in_channels]
