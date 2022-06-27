@@ -318,7 +318,7 @@ class GCN(MessagePassing):
         out += self.bias
         out = out.reshape(out.shape[0] * out.shape[1], out.shape[2])
         #out = out.reshape(out.shape[0]*out.shape[1],out.shape[2],out.shape[3])
-        return out[None, :]
+        return out[None,None, :]
 
     def message(self, x_j, norm):
         return norm.view(-1, 1) * x_j
