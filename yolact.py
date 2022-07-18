@@ -292,7 +292,7 @@ class EdgeConv(MessagePassing):
 class GCN(MessagePassing):
     def __init__(self, in_channels, out_channels, type="fully_connected"):
         super().__init__(aggr='add')
-        self.nbr_nodes = 5
+        self.nbr_nodes = 8
         if type == 'fully_connected':
             self.adj_matrix = np.ones((self.nbr_nodes, self.nbr_nodes))
             np.fill_diagonal(self.adj_matrix, 0)
@@ -305,7 +305,7 @@ class GCN(MessagePassing):
         self.bias.data.zero_()
     def forward(self, node_feats):
         print(node_feats.shape)
-        x = torch.tensor_split(node_feats[0], self.nbr_nodes, dim=0)
+        x = torch.tensor_split(node_feats[0], self.nbr_nodes, dim=1)
         print(x[0].shape)
         edge_index = self.adj_matrix.nonzero().t().contiguous()
         edge_index, _ = add_self_loops(edge_index, num_nodes=self.nbr_nodes)
@@ -669,7 +669,7 @@ class Yolact(nn.Module):
         _, _, img_h, img_w = x.size()
         cfg._tmp_img_h = img_h
         cfg._tmp_img_w = img_w
-        x = self.gcn(x)
+        # x = self.gcn(x)
         with timer.env('backbone'):
             outs = self.backbone(x)
         #outs = list(outs)
@@ -677,7 +677,7 @@ class Yolact(nn.Module):
             with timer.env('fpn'):
                 # Use backbone.selected_layers because we overwrote self.selected_layers
                 outs = [outs[i] for i in cfg.backbone.selected_layers]
-                #outs = self.gcns(outs)
+                outs = self.gcns(outs)
                 #outs = self.edgeConvs(outs)
                 outs = self.fpn(outs)
 
