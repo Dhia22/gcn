@@ -306,8 +306,8 @@ class GCN(MessagePassing):
     def forward(self, node_feats):
         print(node_feats.shape)
         x = torch.tensor_split(node_feats, self.nbr_nodes, dim=0)
-        print(len(torch.tensor_split(node_feats, self.nbr_nodes, dim=0)))
-        print(len(torch.tensor_split(node_feats, self.nbr_nodes, dim=1)))
+        print(torch.tensor_split(node_feats, self.nbr_nodes, dim=0)[0].shape)
+        print(torch.tensor_split(node_feats, self.nbr_nodes, dim=1)[0].shape)
         edge_index = self.adj_matrix.nonzero().t().contiguous()
         edge_index, _ = add_self_loops(edge_index, num_nodes=self.nbr_nodes)
         x = torch.stack(x)
