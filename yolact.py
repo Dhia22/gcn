@@ -292,7 +292,7 @@ class EdgeConv(MessagePassing):
 class GCN(MessagePassing):
     def __init__(self, in_channels, out_channels, type="fully_connected"):
         super().__init__(aggr='add')
-        self.nbr_nodes = 8
+        self.nbr_nodes = 5
         if type == 'fully_connected':
             self.adj_matrix = np.ones((self.nbr_nodes, self.nbr_nodes))
             np.fill_diagonal(self.adj_matrix, 0)
