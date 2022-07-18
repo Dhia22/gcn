@@ -292,7 +292,7 @@ class EdgeConv(MessagePassing):
 class GCN(MessagePassing):
     def __init__(self, in_channels, out_channels, type="fully_connected"):
         super().__init__(aggr='add')
-        self.nbr_nodes = 3
+        self.nbr_nodes = 8
         if type == 'fully_connected':
             self.adj_matrix = np.ones((self.nbr_nodes, self.nbr_nodes))
             np.fill_diagonal(self.adj_matrix, 0)
@@ -304,11 +304,13 @@ class GCN(MessagePassing):
         self.lin.reset_parameters()
         self.bias.data.zero_()
     def forward(self, node_feats):
-        x = torch.tensor_split(node_feats[0], self.nbr_nodes, dim=0)
+        print(node_feats.shape)
+        x = torch.tensor_split(node_feats, self.nbr_nodes, dim=1)
+        print(x.shape)
         edge_index = self.adj_matrix.nonzero().t().contiguous()
         edge_index, _ = add_self_loops(edge_index, num_nodes=self.nbr_nodes)
         x = torch.stack(x)
-        #x = self.lin(x)
+        x = self.lin(x)
         row, col = edge_index
         deg = degree(col, x.size(0), dtype=x.dtype)
         deg_inv_sqrt = deg.pow(-0.5)
